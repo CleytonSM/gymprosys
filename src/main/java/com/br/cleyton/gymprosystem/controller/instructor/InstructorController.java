@@ -17,12 +17,28 @@ public class InstructorController {
 
     @PostMapping("/create")
     @Transactional
-    public ResponseEntity<?> createInstructor(@RequestBody @Validated InstructorModel instructorModel) {
+    public ResponseEntity<Object> createInstructor(@RequestBody @Validated InstructorModel instructorModel) {
         return service.createInstructor(instructorModel);
     }
 
     @GetMapping("/id={id}")
-    public ResponseEntity<?> getInstructor(@PathVariable Integer id) {
+    public ResponseEntity<Object> getInstructor(@PathVariable Integer id) {
         return service.getInstructor(id);
+    }
+
+    @GetMapping("/")
+    public ResponseEntity<Object> getAllInstructors() {
+        return service.getAllInstructors();
+    }
+
+    @GetMapping("/page={pageNumber}")
+    public ResponseEntity<Object> getAllInstructorsPageable(int pageNumber) {
+        return service.getAllInstructorsPageable(pageNumber);
+    }
+
+    @PatchMapping("/partial_update/id={id}")
+    @Transactional
+    public ResponseEntity<Object> partialInstructorUpdate(@PathVariable Integer id, @RequestBody InstructorModel instructorModel) {
+        return service.partialInstructorUpdate(id, instructorModel);
     }
 }
