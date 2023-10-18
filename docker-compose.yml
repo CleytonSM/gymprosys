@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: '123123'
+      MYSQL_DATABASE: 'GYMPROSYS'
+      MYSQL_USER: 'dba'
+      MYSQL_PASSWORD: '123123'
+
+    ports:
+      - "3307:3306"
