@@ -1,14 +1,19 @@
 package com.br.cleyton.gymprosystem.service.instructor;
 
-import com.br.cleyton.gymprosystem.errors.IllegalCpfException;
+import com.br.cleyton.gymprosystem.controller.GetValidator;
+import com.br.cleyton.gymprosystem.controller.PatchValidator;
+import com.br.cleyton.gymprosystem.controller.PostValidator;
+import com.br.cleyton.gymprosystem.controller.PutValidator;
 import com.br.cleyton.gymprosystem.model.instructor.InstructorModel;
 import com.br.cleyton.gymprosystem.model.instructor.InstructorRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.br.cleyton.gymprosystem.model.instructor.UpdateInstructorData;
+import org.springframework.beans.factory.annotation.Autowired;;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
+import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class InstructorService {
@@ -16,32 +21,47 @@ public class InstructorService {
     @Autowired
     private InstructorRepository repository;
 
-    public ResponseEntity<?> createInstructor (InstructorModel instructorModel){
-        try {
-            IllegalCpfException.validateCpf(instructorModel.getCpf());
-            isInstructorExists(instructorModel);
-            InstructorModel instructor = repository.save(instructorModel);
 
-            return new ResponseEntity<>(instructor, HttpStatus.CREATED);
-        } catch (IllegalCpfException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+    public ResponseEntity<Object> createInstructor (InstructorModel instructorBody){
+        PostValidator postValidator = new PostValidator(instructorBody, repository);
+        InstructorModel instructor = postValidator.postInstructorValidator();
+
+        return new ResponseEntity<>(instructor, HttpStatus.CREATED);
     }
 
-    public ResponseEntity<?> getInstructor (Integer id) {
-        Optional<InstructorModel> instructorModel = repository.findById(id);
-        if(instructorModel.isEmpty()) {
-            return new ResponseEntity<>("This instructor does not exist", HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(instructorModel, HttpStatus.OK);
+    public ResponseEntity<Object> getInstructor (Integer id) {
+        GetValidator getValidator = new GetValidator(id, repository);
+        InstructorModel instructor = getValidator.getInstructorValidator();
+        return new ResponseEntity<>(instructor, HttpStatus.OK);
     }
 
-    public void isInstructorExists (InstructorModel instructorModel) throws Exception {
-        InstructorModel isInstructor = repository.findByCpf(instructorModel.getCpf());
-        if(isInstructor != null) {
-            throw new Exception("This instructor is already registered");
-        }
+    public ResponseEntity<Object> getAllInstructors() {
+        GetValidator getValidator = new GetValidator(repository);
+        List<InstructorModel> instructorsList = getValidator.getAllInstructorValidator();
+
+        return new ResponseEntity<>(instructorsList, HttpStatus.OK);
     }
+
+    public ResponseEntity<Object> getAllInstructorsPageable (Integer pageNumber) {
+        GetValidator getValidator = new GetValidator(repository, pageNumber);
+        Stream<InstructorModel> instructorPageList = getValidator.getAllInstructorPageableValidator();
+
+        return new ResponseEntity<>(instructorPageList, HttpStatus.OK);
+    }
+
+    public ResponseEntity<Object> partialInstructorUpdate(Integer id, InstructorModel partialInstructor) {
+        PatchValidator patchValidator = new PatchValidator(id, partialInstructor, repository);
+        InstructorModel instructor = patchValidator.patchInstructorValidator();
+
+        return new ResponseEntity<>(instructor, HttpStatus.OK);
+    }
+
+    public ResponseEntity<Object> fullInstructorUpdate(Integer id, UpdateInstructorData data) {
+        PutValidator putValidator = new PutValidator(id, data, repository);
+        InstructorModel instructor = putValidator.putInstructorValidator();
+
+        return new ResponseEntity<>(instructor, HttpStatus.OK);
+    }
+
+    //TODO soft delete instructor through hibernate (@SQLDelete), when I stop using h2-console
 }

@@ -1,6 +1,6 @@
-package com.br.cleyton.gymprosystem.errors;
+package com.br.cleyton.gymprosystem.exceptions;
 
-public class ApiRequestException extends RuntimeException{ //custon exception that we will throw in our api
+public class ApiRequestException extends RuntimeException{ //custom exception that we will throw in our api
 
     public ApiRequestException(String message) {
         super(message);
