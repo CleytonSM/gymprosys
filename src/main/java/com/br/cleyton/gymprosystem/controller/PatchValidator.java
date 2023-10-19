@@ -41,6 +41,8 @@ public class PatchValidator {
             instructor.setYears(partialInstructor.getYears());
         }
 
+        repository.save(instructor);
+
         return instructor;
     }
 }

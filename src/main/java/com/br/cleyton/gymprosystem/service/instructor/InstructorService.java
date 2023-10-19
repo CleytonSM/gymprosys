@@ -1,87 +1,67 @@
 package com.br.cleyton.gymprosystem.service.instructor;
 
+import com.br.cleyton.gymprosystem.controller.GetValidator;
 import com.br.cleyton.gymprosystem.controller.PatchValidator;
-import com.br.cleyton.gymprosystem.exceptions.*;
+import com.br.cleyton.gymprosystem.controller.PostValidator;
+import com.br.cleyton.gymprosystem.controller.PutValidator;
 import com.br.cleyton.gymprosystem.model.instructor.InstructorModel;
 import com.br.cleyton.gymprosystem.model.instructor.InstructorRepository;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
+import com.br.cleyton.gymprosystem.model.instructor.UpdateInstructorData;
+import org.springframework.beans.factory.annotation.Autowired;;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class InstructorService {
 
     @Autowired
     private InstructorRepository repository;
-    @Autowired
-    private InstructorAlreadyExistsException instructorAlreadyExistsException; // verificar opção melhor para resolver isso
 
-    public ResponseEntity<Object> createInstructor (InstructorModel instructorModel){
-        try {
-            IllegalCpfException.validateCpf(instructorModel.getCpf());
-            instructorAlreadyExistsException.validateInstructor(instructorModel);
-            InstructorModel instructor = repository.save(instructorModel);
 
-            return new ResponseEntity<>(instructor, HttpStatus.CREATED);
-        } catch (IllegalCpfException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
-        }
+    public ResponseEntity<Object> createInstructor (InstructorModel instructorBody){
+        PostValidator postValidator = new PostValidator(instructorBody, repository);
+        InstructorModel instructor = postValidator.postInstructorValidator();
+
+        return new ResponseEntity<>(instructor, HttpStatus.CREATED);
     }
 
     public ResponseEntity<Object> getInstructor (Integer id) {
-        Optional<InstructorModel> instructorModel = repository.findById(id);
-        if(instructorModel.isEmpty()) {
-            return new ResponseEntity<>("This instructor does not exist", HttpStatus.NOT_FOUND);
-        }
-        return new ResponseEntity<>(instructorModel, HttpStatus.OK);
+        GetValidator getValidator = new GetValidator(id, repository);
+        InstructorModel instructor = getValidator.getInstructorValidator();
+        return new ResponseEntity<>(instructor, HttpStatus.OK);
     }
 
     public ResponseEntity<Object> getAllInstructors() {
-        List<InstructorModel> allInstructors = repository.findAll();
-        if(allInstructors.isEmpty()) {
-            return new ResponseEntity<>("There isn't instructors created yet", HttpStatus.NOT_FOUND);
-        }
+        GetValidator getValidator = new GetValidator(repository);
+        List<InstructorModel> instructorsList = getValidator.getAllInstructorValidator();
 
-        return new ResponseEntity<>(allInstructors, HttpStatus.OK);
+        return new ResponseEntity<>(instructorsList, HttpStatus.OK);
     }
 
-    public ResponseEntity<Object> getAllInstructorsPageable (int pageNumber) {
-        int definedSize = 5;
-        Pageable pageable = PageRequest.of(pageNumber, definedSize);
-        Page<InstructorModel> instructorsPage = repository.findAll(pageable);
-        if(instructorsPage.isEmpty()) {
-            throw new ApiRequestException("This page is empty");
-        }
+    public ResponseEntity<Object> getAllInstructorsPageable (Integer pageNumber) {
+        GetValidator getValidator = new GetValidator(repository, pageNumber);
+        Stream<InstructorModel> instructorPageList = getValidator.getAllInstructorPageableValidator();
 
-        return new ResponseEntity<>(instructorsPage.stream(), HttpStatus.OK);
+        return new ResponseEntity<>(instructorPageList, HttpStatus.OK);
     }
 
-    public ResponseEntity<Object> partialInstructorUpdate(int id, InstructorModel partialInstructor) {
+    public ResponseEntity<Object> partialInstructorUpdate(Integer id, InstructorModel partialInstructor) {
         PatchValidator patchValidator = new PatchValidator(id, partialInstructor, repository);
         InstructorModel instructor = patchValidator.patchInstructorValidator();
-
-        repository.save(instructor);
 
         return new ResponseEntity<>(instructor, HttpStatus.OK);
     }
 
-    public ResponseEntity<Object> fullInstructorUpdate(int id, InstructorModel instructorModel) {
-        Optional<InstructorModel> optionalInstructorModel = repository.findById(id);
+    public ResponseEntity<Object> fullInstructorUpdate(Integer id, UpdateInstructorData data) {
+        PutValidator putValidator = new PutValidator(id, data, repository);
+        InstructorModel instructor = putValidator.putInstructorValidator();
 
-        if(optionalInstructorModel.isEmpty()) {
-            throw new EntityNotFoundException("This instructor does not exist");
-        }
-
-        InstructorModel instructor = optionalInstructorModel.get();
-        instructor.set
-        return new ResponseEntity<>(optionalInstructorModel.stream(), HttpStatus.OK);
-
+        return new ResponseEntity<>(instructor, HttpStatus.OK);
     }
+
+    //TODO soft delete instructor through hibernate (@SQLDelete), when I stop using h2-console
 }

@@ -1,8 +1,10 @@
 package com.br.cleyton.gymprosystem.model.instructor;
 
+
 public record UpdateInstructorData(
         String name,
         String lastname,
-        Strin
+        String cpf,
+        Integer years
 ) {
 }

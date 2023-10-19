@@ -1,6 +1,8 @@
 package com.br.cleyton.gymprosystem.exceptions.builder;
 
 import com.br.cleyton.gymprosystem.exceptions.ApiRequestException;
+import com.br.cleyton.gymprosystem.exceptions.CpfLengthException;
+import com.br.cleyton.gymprosystem.exceptions.EntityAlreadyExistsException;
 import com.br.cleyton.gymprosystem.exceptions.EntityNotFoundException;
 import com.br.cleyton.gymprosystem.model.instructor.InstructorRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,7 +35,7 @@ public class ApiExceptionHandler  {
     }
 
     @ExceptionHandler(value = {EntityNotFoundException.class})
-    public ResponseEntity<Object> entityDoesNotExist(EntityNotFoundException e) {
+    public ResponseEntity<Object> entityDoesNotExistException(EntityNotFoundException e) {
         HttpStatus notFound = HttpStatus.NOT_FOUND;
 
         ApiException apiException = new ApiException(
@@ -43,5 +45,32 @@ public class ApiExceptionHandler  {
         );
 
         return new ResponseEntity<>(apiException, notFound);
+    }
+
+    @ExceptionHandler(value = {CpfLengthException.class})
+    public ResponseEntity<Object> illegalCpfLengthException (CpfLengthException e) {
+        HttpStatus badRequest = HttpStatus.BAD_REQUEST;
+
+        ApiException apiException = new ApiException(
+                e.getMessage(),
+                badRequest,
+                ZonedDateTime.now()
+        );
+
+        return new ResponseEntity<>(apiException, badRequest);
+    }
+
+
+    @ExceptionHandler(value = {EntityAlreadyExistsException.class})
+    public ResponseEntity<Object> entityAlreadyExistsException (EntityAlreadyExistsException e) {
+        HttpStatus badRequest = HttpStatus.BAD_REQUEST;
+
+        ApiException apiException = new ApiException(
+                e.getMessage(),
+                badRequest,
+                ZonedDateTime.now()
+        );
+
+        return new ResponseEntity<>(apiException, badRequest);
     }
 }
