@@ -1,17 +1,14 @@
-package com.br.cleyton.gymprosystem.model.instructor;
+package com.br.cleyton.gymprosystem.model.customer;
 
 import jakarta.persistence.*;
 import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.SQLDelete;
-import org.hibernate.annotations.Where;
 
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Entity
 @Data
-public class InstructorModel {
+public class CustomerModel {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -20,11 +17,14 @@ public class InstructorModel {
     private String name;
     @Column(length = 50, nullable = false)
     private String lastname;
-    @Column(length = 11, nullable = false, unique = true)
-    private String cpf;
+    @Column(nullable = false,unique = true)
+    private String email;
     @Column(nullable = false)
     private Integer years;
-    private Boolean isDeleted = Boolean.FALSE;
+    @Column(nullable = false)
+    private GymPlans plan;
+    @Column(nullable = false)
+    private LocalDateTime expirationDate;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
